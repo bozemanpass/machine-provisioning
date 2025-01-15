@@ -127,6 +127,8 @@ EOF
 sudo kubectl apply -f /tmp/lb.yml.$$
 rm -f /tmp/lb.yml.$$
 
+sudo kubectl annotate ingressclass nginx ingressclass.kubernetes.io/is-default-class=true
+
 echo "Installed nginx ingress"
 
 echo "**************************************************************************************"
