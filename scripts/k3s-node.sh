@@ -91,8 +91,74 @@ echo "Installing k3s"
 k3s_installer_file=$HOME/install-k3s.sh
 curl -sfL https://get.k3s.io -o ${k3s_installer_file}
 chmod +x ${k3s_installer_file}
-sudo ${k3s_installer_file}
+
+export INSTALL_K3S_EXEC="server - no-deploy traefik"
+sudo --preserve-env=INSTALL_K3S_EXEC ${k3s_installer_file}
 echo "Installed k3s"
+
+
+echo "**************************************************************************************"
+echo "Installing nginx ingress"
+sudo kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.12.0/deploy/static/provider/baremetal/deploy.yaml
+
+cat > /tmp/lb.yml.$$ <<EOF
+apiVersion: v1
+kind: Service
+metadata:
+  name: ingress-nginx-controller-loadbalancer
+  namespace: ingress-nginx
+spec:
+  selector:
+    app.kubernetes.io/component: controller
+    app.kubernetes.io/instance: ingress-nginx
+    app.kubernetes.io/name: ingress-nginx
+  ports:
+    - name: http
+      port: 80
+      protocol: TCP
+      targetPort: 80
+    - name: https
+      port: 443
+      protocol: TCP
+      targetPort: 443
+  type: LoadBalancer
+EOF
+
+sudo kubectl apply -f /tmp/lb.yml.$$
+rm -f /tmp/lb.yml.$$
+
+echo "Installed nginx ingress"
+
+echo "**************************************************************************************"
+echo "Installing cert-manager"
+
+sudo kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.16.2/cert-manager.yaml
+
+cat > /tmp/ci.yml.$$ <<EOF
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-prod
+  namespace: cert-manager
+spec:
+  acme:
+    # The ACME server URL
+    server: https://acme-v02.api.letsencrypt.org/directory
+    # Email address used for ACME registration
+    email: telackey@bozemanpass.com
+    # Name of a secret used to store the ACME account private key
+    privateKeySecretRef:
+      name: letsencrypt-prod
+    # Enable the HTTP-01 challenge provider
+    solvers:
+    - http01:
+        ingress:
+          class: nginx
+EOF
+sudo kubectl apply -f /tmp/ci.yml.$$
+
+echo "Installed cert-manager"
+
 
 # End of long if block: Skip the package install stuff if so directed
 fi
