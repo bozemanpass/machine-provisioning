@@ -30,8 +30,8 @@ function retry {
   while [ $try -lt $max ]; do
     try=$((try + 1))
     echo "Try $try of $* ..."
-    $*
-    if [ $? -eq 0 ]; then
+    $* && RC=$? || RC=$?
+    if [ $RC -eq 0 ]; then
       return 0
     fi
   done
