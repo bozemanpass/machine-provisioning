@@ -28,12 +28,12 @@ function retry {
   local max=5
   local delay=5
   while [ $try -lt $max ]; do
+    try=$((try + 1))
     echo "Try $try of $* ..."
     $*
     if [ $? -eq 0 ]; then
       return 0
     fi
-    try=$((try + 1))
   done
   return 1
 }
