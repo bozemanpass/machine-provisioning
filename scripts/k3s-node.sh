@@ -7,14 +7,18 @@ install_dir=~/bin
 
 NEEDS_WARN=true
 LETSENCRYPT_EMAIL=""
+DO_TOKEN=""
 
-while getopts "ye:" arg; do
+while getopts "ye:t:" arg; do
   case $arg in
     y)
       NEEDS_WARN=false
       ;;
     e)
       LETSENCRYPT_EMAIL=$OPTARG
+      ;;
+    t)
+      DO_TOKEN=$OPTARG
       ;;
   esac
 done
@@ -206,9 +210,48 @@ spec:
          class:  nginx
 EOF
 
+cat > $HOME/digitalocean-dns.yml <<EOF
+apiVersion: v1
+data:
+  access-token: $DO_TOKEN
+kind: Secret
+metadata:
+  name: digitalocean-dns
+  namespace: cert-manager
+EOF
+
+
+cat > $HOME/letsencrypt-prod-dns01.yml <<EOF
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-prod-dns
+  namespace: cert-manager
+spec:
+  acme:
+    # Email address used for ACME registration
+    email: $LETSENCRYPT_EMAIL
+    server: https://acme-v02.api.letsencrypt.org/directory
+    privateKeySecretRef:
+      # Name of a secret used to store the ACME account private key
+      name: letsencrypt-prod
+    solvers:
+      - dns01:
+          digitalocean:
+            tokenSecretRef:
+              name: digitalocean-dns
+              key: access-token
+EOF
+
 if [[ ! -z "$LETSENCRYPT_EMAIL" ]]; then
   sudo kubectl apply -f $HOME/letsencrypt-prod.yml
   sudo kubectl apply -f $HOME/letsencrypt-stage.yml
+  if [[ ! -z "$DO_TOKEN" ]]; then
+    sudo kubectl apply -f $HOME/digitalocean-dns.yml
+    sudo kubectl apply -f $HOME/letsencrypt-prod-dns01.yml
+  else
+    echo "No DigitalOcean access token specified, so a DNS-based ClusterIssuer's could not be created.  Template files created at $HOME/digitalocean-dns.yml and $HOME/letsencrypt-prod-dns-01.yml"
+  fi
 else
   echo "No e-mail specified, so ClusterIssuer's could not be created.  Template files created at $HOME/letsencrypt-prod.yml and $HOME/letsencrypt-stage.yml"
 fi
