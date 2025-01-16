@@ -26,13 +26,15 @@ done
 function retry {
   local try=0
   local max=5
-  local delay=5
+  local delay=10
   while [ $try -lt $max ]; do
     try=$((try + 1))
     echo "Try $try of $* ..."
     $* && RC=$? || RC=$?
     if [ $RC -eq 0 ]; then
       return 0
+    else
+      sleep $delay
     fi
   done
   return 1
