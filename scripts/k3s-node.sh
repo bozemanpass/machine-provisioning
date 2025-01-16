@@ -135,6 +135,18 @@ echo "Installing cert-manager"
 
 sudo kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.16.2/cert-manager.yaml
 
+echo "Waiting for cert-manager to come up..."
+MAX_TRIES=30
+TRY=0
+while [ `sudo kubectl get pods --namespace cert-manager | grep Running  | wc -l` -lt 3 ]; do
+  sleep 10
+  TRY=$((TRY + 1))
+  if [ $TRY -ge $MAX_TRIES ]; then
+    echo "ERROR: cert-manager failed to come up." 1>&2
+    exit 1
+  fi
+done
+
 cat > /tmp/ci.yml.$$ <<EOF
 apiVersion: cert-manager.io/v1
 kind: ClusterIssuer
