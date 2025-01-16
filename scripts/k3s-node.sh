@@ -1,15 +1,28 @@
- #!/usr/bin/env bash
+#!/usr/bin/env bash
 if [[ -n "$BPI_SCRIPT_DEBUG" ]]; then
     set -x
 fi
 
 install_dir=~/bin
 
+NEEDS_WARN=true
+
+while getopts "ye:" arg; do
+  case $arg in
+    y)
+      NEEDS_WARN=false
+      ;;
+    s)
+      LETSENCRYPT_EMAIL=$OPTARG
+      ;;
+  esac
+done
+
 # Skip the package install stuff if so directed
 if ! [[ -n "$BPI_INSTALL_SKIP_PACKAGES" ]]; then
 
 # First display a reasonable warning to the user unless run with -y
-if ! [[ $# -eq 1 && $1 == "-y" ]]; then
+if [[ "$NEEDS_WARN" == "true" ]]; then
   echo "**************************************************************************************"
   echo "This script requires sudo privilege. It installs utilities"
   echo "into: ${install_dir}. It also *removes* any existing docker installed on"
@@ -147,7 +160,8 @@ while [ `sudo kubectl get pods --namespace cert-manager | grep Running  | wc -l`
   fi
 done
 
-cat > /tmp/ci.yml.$$ <<EOF
+
+cat > $HOME/letsencrypt-prod.yml <<EOF
 apiVersion: cert-manager.io/v1
 kind: ClusterIssuer
 metadata:
@@ -158,7 +172,7 @@ spec:
     # The ACME server URL
     server: https://acme-v02.api.letsencrypt.org/directory
     # Email address used for ACME registration
-    email: telackey@bozemanpass.com
+    email: $LETSENCRYPT_EMAIL
     # Name of a secret used to store the ACME account private key
     privateKeySecretRef:
       name: letsencrypt-prod
@@ -168,7 +182,35 @@ spec:
         ingress:
           class: nginx
 EOF
-sudo kubectl apply -f /tmp/ci.yml.$$
+
+cat > $HOME/letsencrypt-stage.yml <<EOF
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+ name: letsencrypt-staging
+ namespace: cert-manager
+spec:
+ acme:
+   # The ACME server URL
+   server: https://acme-staging-v02.api.letsencrypt.org/directory
+   # Email address used for ACME registration
+   email: $LETSENCRYPT_EMAIL
+   # Name of a secret used to store the ACME account private key
+   privateKeySecretRef:
+     name: letsencrypt-staging
+   # Enable the HTTP-01 challenge provider
+   solvers:
+   - http01:
+       ingress:
+         class:  nginx
+EOF
+
+if [[ ! -z "$LETSENCRYPT_EMAIL" ]]; then
+  sudo kubectl apply -f $HOME/letsencrypt-prod.yml
+  sudo kubectl apply -f $HOME/letsencrypt-stage.yml
+else
+  echo "No e-mail specified, so ClusterIssuer's could not be created.  Template files created at $HOME/letsencrypt-prod.yml and $HOME/letsencrypt-stage.yml"
+fi
 
 echo "Installed cert-manager"
 
