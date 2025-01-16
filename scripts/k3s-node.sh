@@ -178,6 +178,7 @@ while [ `sudo kubectl get pods --namespace cert-manager | grep Running | wc -l` 
     echo "ERROR: cert-manager failed to come up." 1>&2
     exit 1
   fi
+  sleep 10
 done
 
 cat > $HOME/letsencrypt-prod.yml <<EOF
