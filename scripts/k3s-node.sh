@@ -18,7 +18,7 @@ while getopts "ye:t:" arg; do
       LETSENCRYPT_EMAIL=$OPTARG
       ;;
     t)
-      DO_TOKEN=$OPTARG
+      DO_TOKEN=$(echo -n "$OPTARG" | base64 -w0)
       ;;
   esac
 done
