@@ -23,6 +23,21 @@ while getopts "ye:t:" arg; do
   esac
 done
 
+function retry {
+  local try=0
+  local max=5
+  local delay=5
+  while [ $try -lt $max ]; do
+    echo "Try $try of $* ..."
+    $*
+    if [ $? -eq 0 ]; then
+      return 0
+    fi
+    try=$((try + 1))
+  done
+  return 1
+}
+
 # Skip the package install stuff if so directed
 if ! [[ -n "$BPI_INSTALL_SKIP_PACKAGES" ]]; then
 
@@ -154,17 +169,16 @@ echo "Installing cert-manager"
 sudo kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.16.2/cert-manager.yaml
 
 echo "Waiting for cert-manager to come up..."
+
 MAX_TRIES=30
 TRY=0
-while [ `sudo kubectl get pods --namespace cert-manager | grep Running  | wc -l` -lt 3 ]; do
-  sleep 10
+while [ `sudo kubectl get pods --namespace cert-manager | grep Running | wc -l` -lt 3 ]; do
   TRY=$((TRY + 1))
   if [ $TRY -ge $MAX_TRIES ]; then
     echo "ERROR: cert-manager failed to come up." 1>&2
     exit 1
   fi
 done
-
 
 cat > $HOME/letsencrypt-prod.yml <<EOF
 apiVersion: cert-manager.io/v1
@@ -244,11 +258,11 @@ spec:
 EOF
 
 if [[ ! -z "$LETSENCRYPT_EMAIL" ]]; then
-  sudo kubectl apply -f $HOME/letsencrypt-prod.yml
-  sudo kubectl apply -f $HOME/letsencrypt-stage.yml
+  retry sudo kubectl apply -f $HOME/letsencrypt-prod.yml
+  retry sudo kubectl apply -f $HOME/letsencrypt-stage.yml
   if [[ ! -z "$DO_TOKEN" ]]; then
-    sudo kubectl apply -f $HOME/digitalocean-dns.yml
-    sudo kubectl apply -f $HOME/letsencrypt-prod-dns01.yml
+    retry sudo kubectl apply -f $HOME/digitalocean-dns.yml
+    retry sudo kubectl apply -f $HOME/letsencrypt-prod-dns01.yml
   else
     echo "No DigitalOcean access token specified, so a DNS-based ClusterIssuer's could not be created.  Template files created at $HOME/digitalocean-dns.yml and $HOME/letsencrypt-prod-dns-01.yml"
   fi
