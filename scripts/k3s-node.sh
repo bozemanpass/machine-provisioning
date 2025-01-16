@@ -92,6 +92,8 @@ k3s_installer_file=$HOME/install-k3s.sh
 curl -sfL https://get.k3s.io -o ${k3s_installer_file}
 chmod +x ${k3s_installer_file}
 
+exit 0
+
 export INSTALL_K3S_EXEC="server - no-deploy traefik"
 sudo --preserve-env=INSTALL_K3S_EXEC ${k3s_installer_file}
 echo "Installed k3s"
