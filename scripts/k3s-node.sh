@@ -168,17 +168,21 @@ echo "Installing cert-manager"
 
 sudo kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.16.2/cert-manager.yaml
 
-echo "Waiting for cert-manager to come up..."
 
-MAX_TRIES=30
 TRY=0
-while [ `sudo kubectl get pods --namespace cert-manager | grep Running | wc -l` -lt 3 ]; do
+MAX_TRIES=30
+CM_UP="false"
+while [ "$CM_UP" == "false" ]; do
   TRY=$((TRY + 1))
-  if [ $TRY -ge $MAX_TRIES ]; then
+  echo "Checking if cert-manager is up (try $TRY)..."
+  if [[ `sudo kubectl get pods --namespace cert-manager | grep Running | wc -l` -ge 3 ]]; then
+    CM_UP="true"
+  elif [[ $TRY -ge $MAX_TRIES ]]; then
     echo "ERROR: cert-manager failed to come up." 1>&2
     exit 1
+  else
+    sleep 10
   fi
-  sleep 10
 done
 
 cat > $HOME/letsencrypt-prod.yml <<EOF
