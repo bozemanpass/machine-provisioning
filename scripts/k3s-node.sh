@@ -177,6 +177,7 @@ while [ "$CM_UP" == "false" ]; do
   echo "Checking if cert-manager is up (try $TRY)..."
   if [[ `sudo kubectl get pods --namespace cert-manager | grep Running | wc -l` -ge 3 ]]; then
     CM_UP="true"
+    echo "cert-manager is up!"
   elif [[ $TRY -ge $MAX_TRIES ]]; then
     echo "ERROR: cert-manager failed to come up." 1>&2
     exit 1
@@ -263,13 +264,17 @@ spec:
 EOF
 
 if [[ ! -z "$LETSENCRYPT_EMAIL" ]]; then
+  echo "Adding letsencrypt-prod ClusterIssuer..."
   retry sudo kubectl apply -f $HOME/letsencrypt-prod.yml
+  echo "Adding letsencrypt-staging ClusterIssuer..."
   retry sudo kubectl apply -f $HOME/letsencrypt-stage.yml
   if [[ ! -z "$DO_TOKEN" ]]; then
+    echo "Adding digitalocean-dns Secret..."
     retry sudo kubectl apply -f $HOME/digitalocean-dns.yml
+    echo "Adding letsencrypt-prod-dns ClusterIssuer..."
     retry sudo kubectl apply -f $HOME/letsencrypt-prod-dns01.yml
   else
-    echo "No DigitalOcean access token specified, so a DNS-based ClusterIssuer's could not be created.  Template files created at $HOME/digitalocean-dns.yml and $HOME/letsencrypt-prod-dns-01.yml"
+    echo "No DigitalOcean access token specified, so a DNS-based ClusterIssuer's could not be created.  Template files created at $HOME/digitalocean-dns.yml and $HOME/letsencrypt-prod-dns01.yml"
   fi
 else
   echo "No e-mail specified, so ClusterIssuer's could not be created.  Template files created at $HOME/letsencrypt-prod.yml and $HOME/letsencrypt-stage.yml"
