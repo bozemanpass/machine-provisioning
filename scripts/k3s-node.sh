@@ -13,7 +13,7 @@ while getopts "ye:" arg; do
     y)
       NEEDS_WARN=false
       ;;
-    s)
+    e)
       LETSENCRYPT_EMAIL=$OPTARG
       ;;
   esac
