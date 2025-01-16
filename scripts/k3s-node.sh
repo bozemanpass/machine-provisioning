@@ -6,6 +6,7 @@ fi
 install_dir=~/bin
 
 NEEDS_WARN=true
+LETSENCRYPT_EMAIL=""
 
 while getopts "ye:" arg; do
   case $arg in
