@@ -20,12 +20,25 @@ while (( "$#" )); do
    shift
 done
 
-if [[ -z "$(which wget)" ]]; then
-  echo "**************************************************************************************"
-  echo "Installing required packages"
-  sudo apt -y update
-  sudo apt -y install wget
-fi
+function maybe_install {
+  local todo=""
+  while (( "$#" )); do
+    local exists=false
+    which $1 >/dev/null && exists=true || exists=false
+    if [[ "true" != "$exists" ]]; then
+      todo="$todo $1"
+    fi
+    shift
+  done
+  if [[ ! -z "$todo" ]]; then
+    echo "**************************************************************************************"
+    echo "Installing required packages"
+    sudo apt -y update
+    sudo apt -y install $todo
+  fi
+}
+
+maybe_install wget
 
 step=0
 rc=0
