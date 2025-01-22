@@ -3,6 +3,9 @@ if [[ -n "$BPI_SCRIPT_DEBUG" ]]; then
     set -x
 fi
 
+export DEBIAN_FRONTEND=noninteractive
+export NEEDRESTART_MODE=a
+
 FORCE="false"
 VER="latest"
 
@@ -33,7 +36,7 @@ function maybe_install {
     echo "**************************************************************************************"
     echo "Installing required packages"
     sudo apt -y update
-    sudo apt -y install $todo
+    sudo -E DEBIAN_FRONTEND,NEEDRESTART_MODE apt -y install $todo
   fi
 }
 

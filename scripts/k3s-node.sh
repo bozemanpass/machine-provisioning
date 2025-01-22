@@ -3,6 +3,9 @@ if [[ -n "$BPI_SCRIPT_DEBUG" ]]; then
     set -x
 fi
 
+export DEBIAN_FRONTEND=noninteractive
+export NEEDRESTART_MODE=a
+
 install_dir=~/bin
 
 NEEDS_WARN=true
@@ -111,15 +114,13 @@ set -euo pipefail  ## https://vaneyckt.io/posts/safer_bash_scripts_with_set_euxo
 if [[ -n "${installed_packages_to_remove}" ]]; then
   echo "**************************************************************************************"
   echo "Removing existing docker packages"
-  sudo apt -y remove $installed_packages_to_remove
+  sudo -E DEBIAN_FRONTEND,NEEDRESTART_MODE apt -y remove $installed_packages_to_remove
 fi
 
 echo "**************************************************************************************"
 echo "Installing extra packages"
 sudo apt -y update
-sudo apt -y install jq
-sudo apt -y install git
-sudo apt -y install curl
+sudo -E DEBIAN_FRONTEND,NEEDRESTART_MODE apt -y install jq git curl wget
 
 echo "**************************************************************************************"
 echo "Installing k3s"
