@@ -2,7 +2,7 @@
 if [[ -n "$BPI_SCRIPT_DEBUG" ]]; then
     set -x
 fi
-
+set -x
 echo "$0 called with $*"
 
 set -eo pipefail  ## https://vaneyckt.io/posts/safer_bash_scripts_with_set_euxo_pipefail/
