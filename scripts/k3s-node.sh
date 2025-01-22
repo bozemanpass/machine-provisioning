@@ -8,12 +8,12 @@ export NEEDRESTART_MODE=a
 
 install_dir=~/bin
 
-NEEDS_WARN=true
-LETSENCRYPT_EMAIL=""
 DO_TOKEN=""
 IMAGE_REGISTRY=""
 IMAGE_REGISTRY_USERNAME=""
 IMAGE_REGISTRY_PASSWORD=""
+LETSENCRYPT_EMAIL=""
+NEEDS_WARN=true
 
 while (( "$#" )); do
    case $1 in
@@ -24,7 +24,7 @@ while (( "$#" )); do
          shift&&LETSENCRYPT_EMAIL="$1"||die
          ;;
       --image-registry)
-         shift&&IMAGE_REGISTRY="$(echo -n "$1" | base64 -w0)"||die
+         shift&&IMAGE_REGISTRY="$1"||die
          ;;
       --image-registry-username)
          shift&&IMAGE_REGISTRY_USERNAME="$1"||die
