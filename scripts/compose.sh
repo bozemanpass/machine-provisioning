@@ -18,6 +18,9 @@ while (( "$#" )); do
       --args)
          shift&&ARGS["$LAST_SCRIPT"]="$1"||die
          ;;
+         *)
+         echo "Unrecognized argument: $1"
+         ;;
    esac
    shift
 done
