@@ -17,10 +17,10 @@ declare -A ARGS
 
 while (( "$#" )); do
    case $1 in
-      --script)
+      --script-url)
          shift&&LAST_SCRIPT="$1"&&SCRIPTS+=("$1")||die
          ;;
-      --args)
+      --script-args)
          shift&&ARGS["$LAST_SCRIPT"]="$1"||die
          ;;
          *)

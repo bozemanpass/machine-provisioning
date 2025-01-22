@@ -307,7 +307,7 @@ echo "Configuring image registries"
 if [[ -n "$IMAGE_REGISTRY" ]]; then
   cat > /tmp/registries.yaml.$$ <<EOF
 mirrors:
-  $IMAGE_REGISTRY_URL:
+  $IMAGE_REGISTRY:
     endpoint:
       - https://$IMAGE_REGISTRY
 EOF
