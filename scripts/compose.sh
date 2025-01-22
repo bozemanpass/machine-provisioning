@@ -3,7 +3,7 @@ if [[ -n "$BPI_SCRIPT_DEBUG" ]]; then
     set -x
 fi
 
-DEFAULT_SCRIPT_URL_PREFIX="https://raw.githubusercontent.com/bozemanpass/machine-provisioning/refs/heads/main/scripts/"
+DEFAULT_SCRIPT_URL_PREFIX="https://raw.githubusercontent.com/bozemanpass/machine-provisioning/refs/heads/main/scripts"
 
 export DEBIAN_FRONTEND=noninteractive
 export NEEDRESTART_MODE=a
@@ -67,7 +67,7 @@ for script in "${SCRIPTS[@]}"; do
       script="${DEFAULT_SCRIPT_URL_PREFIX}/${script}"
     fi
     echo "Downloading $script to /tmp/compose.script.$step ..."
-    wget -q -O /tmp/compose.step.$step $cmd
+    wget -q -O /tmp/compose.step.$step $script
     chmod 700 /tmp/compose.step.$step
     cmd=/tmp/compose.step.$step
   fi
