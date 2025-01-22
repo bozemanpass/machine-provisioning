@@ -63,11 +63,12 @@ for script in "${SCRIPTS[@]}"; do
   if [[ $script == /* ]]; then
    cmd="$script"
   else
-    if [[ $script != http* ]]; then
-      script="${DEFAULT_SCRIPT_URL_PREFIX}/${script}"
+    script_url="$script"
+    if [[ $script_url != http* ]]; then
+      script_url="${DEFAULT_SCRIPT_URL_PREFIX}/${script}"
     fi
-    echo "Downloading $script to /tmp/compose.script.$step ..."
-    wget -q -O /tmp/compose.step.$step $script
+    echo "Downloading $script_url to /tmp/compose.script.$step ..."
+    wget -q -O /tmp/compose.step.$step "$script_url"
     chmod 700 /tmp/compose.step.$step
     cmd=/tmp/compose.step.$step
   fi
