@@ -2,7 +2,7 @@
 if [[ -n "$BPI_SCRIPT_DEBUG" ]]; then
     set -x
 fi
-set -x
+
 echo "$0 called with $*"
 
 set -eo pipefail  ## https://vaneyckt.io/posts/safer_bash_scripts_with_set_euxo_pipefail/
@@ -59,8 +59,8 @@ for script in "${SCRIPTS[@]}"; do
     chmod 700 /tmp/compose.step.$step
     cmd=/tmp/compose.step.$step
   fi
-  echo "Running: $cmd ${ARGS["$cmd"]}"
-  $cmd ${ARGS["$cmd"]} && rc=$? || rc=$?
+  echo "Running: $cmd ${ARGS["$script"]}"
+  $cmd ${ARGS["$script"]} && rc=$? || rc=$?
   rc=$?
   if [[ $rc -ne 0 ]]; then
     echo "$script FAILED rc=$rc"
