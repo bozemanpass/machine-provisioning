@@ -114,13 +114,13 @@ set -euo pipefail  ## https://vaneyckt.io/posts/safer_bash_scripts_with_set_euxo
 if [[ -n "${installed_packages_to_remove}" ]]; then
   echo "**************************************************************************************"
   echo "Removing existing docker packages"
-  sudo -E DEBIAN_FRONTEND,NEEDRESTART_MODE apt -y remove $installed_packages_to_remove
+  sudo --preserve-env=DEBIAN_FRONTEND,NEEDRESTART_MODE apt -y remove $installed_packages_to_remove
 fi
 
 echo "**************************************************************************************"
 echo "Installing extra packages"
 sudo apt -y update
-sudo -E DEBIAN_FRONTEND,NEEDRESTART_MODE apt -y install jq git curl wget
+sudo --preserve-env=DEBIAN_FRONTEND,NEEDRESTART_MODE apt -y install jq git curl wget
 
 echo "**************************************************************************************"
 echo "Installing k3s"

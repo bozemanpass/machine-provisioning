@@ -42,7 +42,7 @@ function maybe_install {
     echo "**************************************************************************************"
     echo "Installing required packages"
     sudo apt -y update
-    sudo -E DEBIAN_FRONTEND,NEEDRESTART_MODE apt -y install $todo
+    sudo --preserve-env=DEBIAN_FRONTEND,NEEDRESTART_MODE apt -y install $todo
   fi
 }
 
@@ -64,7 +64,6 @@ for script in "${SCRIPTS[@]}"; do
   fi
   echo "Running: $cmd ${ARGS["$script"]}"
   $cmd ${ARGS["$script"]} && rc=$? || rc=$?
-  rc=$?
   if [[ $rc -ne 0 ]]; then
     echo "$script FAILED rc=$rc"
   fi

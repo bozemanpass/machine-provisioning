@@ -36,7 +36,7 @@ function maybe_install {
     echo "**************************************************************************************"
     echo "Installing required packages"
     sudo apt -y update
-    sudo -E DEBIAN_FRONTEND,NEEDRESTART_MODE apt -y install $todo
+    sudo --preserve-env=DEBIAN_FRONTEND,NEEDRESTART_MODE apt -y install $todo
   fi
 }
 
