@@ -11,19 +11,35 @@ install_dir=~/bin
 NEEDS_WARN=true
 LETSENCRYPT_EMAIL=""
 DO_TOKEN=""
+IMAGE_REGISTRY=""
+IMAGE_REGISTRY_USERNAME=""
+IMAGE_REGISTRY_PASSWORD=""
 
-while getopts "ye:t:" arg; do
-  case $arg in
-    y)
-      NEEDS_WARN=false
-      ;;
-    e)
-      LETSENCRYPT_EMAIL=$OPTARG
-      ;;
-    t)
-      DO_TOKEN=$(echo -n "$OPTARG" | base64 -w0)
-      ;;
-  esac
+while (( "$#" )); do
+   case $1 in
+      -y)
+         NEEDS_WARN=false
+         ;;
+      --letsencrypt-email)
+         shift&&LETSENCRYPT_EMAIL="$1"||die
+         ;;
+      --image-registry)
+         shift&&IMAGE_REGISTRY="$(echo -n "$1" | base64 -w0)"||die
+         ;;
+      --image-registry-username)
+         shift&&IMAGE_REGISTRY_USERNAME="$1"||die
+         ;;
+      --image-registry-password)
+         shift&&IMAGE_REGISTRY_PASSWORD="$1"||die
+         ;;
+      --do-dns-access-token)
+         shift&&DO_TOKEN="$(echo -n "$1" | base64 -w0)"||die
+         ;;
+         *)
+         echo "Unrecognized argument: $1" 1>&2
+         ;;
+   esac
+   shift
 done
 
 function retry {
@@ -285,6 +301,30 @@ fi
 
 echo "Installed cert-manager"
 
+echo "**************************************************************************************"
+echo "Configuring image registries"
+
+if [[ -n "$IMAGE_REGISTRY" ]]; then
+  cat > /tmp/registries.yaml.$$ <<EOF
+mirrors:
+  $IMAGE_REGISTRY_URL:
+    endpoint:
+      - https://$IMAGE_REGISTRY
+EOF
+
+  if [[ -n "$IMAGE_REGISTRY_USERNAME" ]] && [[ -n "$IMAGE_REGISTRY_PASSWORD" ]]; then
+    cat >> /tmp/registries.yaml.$$ <<EOF
+configs:
+  $IMAGE_REGISTRY:
+    auth:
+      username: "$IMAGE_REGISTRY_USERNAME"
+      password: "$IMAGE_REGISTRY_PASSWORD"
+EOF
+  fi
+
+  sudo mv /tmp/registries.yaml.$$ /etc/rancher/k3s/registries.yaml
+  sudo systemctl restart k3s
+fi
 
 # End of long if block: Skip the package install stuff if so directed
 fi
