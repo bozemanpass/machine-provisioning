@@ -11,4 +11,4 @@ APT_INSTALL="sudo --preserve-env=DEBIAN_FRONTEND,NEEDRESTART_MODE apt -y install
 set -eo pipefail  ## https://vaneyckt.io/posts/safer_bash_scripts_with_set_euxo_pipefail/
 
 sudo apt update
-$APT_INSTALL build-essential
+$APT_INSTALL $*
