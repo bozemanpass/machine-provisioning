@@ -28,3 +28,10 @@ if [[ "$HAS_DOCKER" == "false" ]]; then
   $APT_INSTALL podman-docker
   sudo touch /etc/containers/nodocker
 fi
+
+# enable standard Docker container registry
+grep '^unqualified-search-registries' /etc/containers/registries.conf >/dev/null
+if [[ $? -ne 0 ]]; then
+  echo 'unqualified-search-registries = ["docker.io"]' | sudo tee -a /etc/containers/registries.conf
+fi
+
