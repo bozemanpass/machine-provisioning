@@ -30,8 +30,7 @@ if [[ "$HAS_DOCKER" == "false" ]]; then
 fi
 
 # enable standard Docker container registry
-HAS_REG=false
-grep '^unqualified-search-registries' /etc/containers/registries.conf >/dev/null && HAS_REG=true
+grep '^unqualified-search-registries' /etc/containers/registries.conf >/dev/null && HAS_REG=true || HAS_REG=false
 if [[ "$HAS_REG" != "true" ]]; then
   echo 'unqualified-search-registries = ["docker.io"]' | sudo tee -a /etc/containers/registries.conf
 fi
