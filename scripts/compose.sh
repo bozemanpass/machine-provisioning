@@ -3,7 +3,7 @@ if [[ -n "$BPI_SCRIPT_DEBUG" ]]; then
     set -x
 fi
 
-DEFAULT_SCRIPT_URL_PREFIX="$(dirname ${BPI_MACHINE_SCRIPT_URL})"
+DEFAULT_SCRIPT_URL_PREFIX="$(dirname ${MACHINE_SCRIPT_URL})"
 if [[ -z "$DEFAULT_SCRIPT_URL_PREFIX" ]]; then
   DEFAULT_SCRIPT_URL_PREFIX="https://raw.githubusercontent.com/bozemanpass/machine-provisioning/refs/heads/main/scripts"
 fi
