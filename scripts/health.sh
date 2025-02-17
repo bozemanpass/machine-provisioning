@@ -42,11 +42,11 @@ function maybe_install {
   fi
 }
 
-maybe_install wget python3
+maybe_install python3
 
-sudo mkdir -p /var/opt/machine/status/cgi-bin
+sudo mkdir -p /var/opt/machine/health/cgi-bin
 
-cat >/tmp/machine.status.$$ <<EOF
+cat >/tmp/machine.health.$$ <<EOF
 #!/bin/bash
 CLOUD_INIT_LOG=/var/log/cloud-init-output.log
 STATUS="INITIALIZING"
@@ -57,7 +57,7 @@ if [ \$? -eq 0 ]; then
 else
   sudo grep '^Cloud-init v' \$CLOUD_INIT_LOG | grep 'Up.*seconds' >/dev/null
   if [ \$? -eq 0 ]; then
-    STATUS="UP"
+    STATUS="DONE"
   fi
 fi
 
@@ -65,8 +65,8 @@ echo "Content-Type: application/json"
 echo ""
 echo "{ \"status\": \"\$STATUS\" }"
 EOF
-sudo mv /tmp/machine.status.$$ /var/opt/machine/status/cgi-bin/status
+sudo mv /tmp/machine.health.$$ /var/opt/machine/health/cgi-bin/cloud-init-status
 sudo chmod -R a+rX /var/opt/machine
-sudo chmod -R a+x /var/opt/machine/status/cgi-bin/status
+sudo chmod -R a+x /var/opt/machine/health/cgi-bin/cloud-init-status
 
-nohup python3 -m http.server --cgi --directory /var/opt/machine/status $PORT &
+nohup python3 -m http.server --cgi --directory /var/opt/machine/health $PORT &
