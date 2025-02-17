@@ -52,7 +52,7 @@ CLOUD_INIT_LOG=/var/log/cloud-init-output.log
 STATUS="INITIALIZING"
 
 sudo grep 'Failed to run module scripts_user' \$CLOUD_INIT_LOG >/dev/null
-if [ \$? -ne 0 ]; then
+if [ \$? -eq 0 ]; then
   STATUS="ERROR"
 else
   sudo grep '^Cloud-init v' \$CLOUD_INIT_LOG | grep 'Up.*seconds' >/dev/null
@@ -62,6 +62,7 @@ else
 fi
 
 echo "Content-Type: application/json"
+echo ""
 echo "{ \"status\": \"\$STATUS\" }"
 EOF
 sudo mv /tmp/machine.status.$$ /var/opt/machine/status/cgi-bin/status
