@@ -10,6 +10,8 @@ echo "$0 called with $*"
 
 set -eo pipefail
 
+PORT=4242
+
 while (( "$#" )); do
    case $1 in
       --port)
@@ -45,9 +47,22 @@ maybe_install wget python3
 sudo mkdir -p /var/opt/machine/status/cgi-bin
 
 cat >/tmp/machine.status.$$ <<EOF
-#!/usr/bin/env python3
-print("Content-Type: text/html\n")
-print("<!doctype html><title>Hello</title><h2>hello world</h2>")
+#!/bin/bash
+CLOUD_INIT_LOG=/var/log/cloud-init-output.log
+STATUS="INITIALIZING"
+
+grep 'Failed to run module scripts_user' $CLOUD_INIT_LOG >/dev/null
+if [ $? -ne 0 ]; then
+  STATUS="ERROR"
+fi
+
+grep '^Cloud-init v' | grep 'Up.*seconds' $CLOUD_INIT_LOG >/dev/null
+if [ $? -eq 0 ]; then
+  STATUS="UP"
+fi
+
+echo "Content-Type: application/json"
+echo "{ \"status\": \"$STATUS\" }"
 EOF
 sudo mv /tmp/machine.status.$$ /var/opt/machine/status/cgi-bin/status
 sudo chmod -R a+rX /var/opt/machine
