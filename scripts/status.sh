@@ -50,7 +50,7 @@ print("Content-Type: text/html\n")
 print("<!doctype html><title>Hello</title><h2>hello world</h2>")
 EOF
 sudo mv /tmp/machine.status.$$ /var/opt/machine/status/cgi-bin/status
-sudo chmod -r a+rX /var/opt/machine
-sudo chmod -r a+x /var/opt/machine/status/cgi-bin/status
+sudo chmod -R a+rX /var/opt/machine
+sudo chmod -R a+x /var/opt/machine/status/cgi-bin/status
 
-nohup python3 -m http.server --cgi --directory /var/opt/machine/status $PORT
+nohup python3 -m http.server --cgi --directory /var/opt/machine/status $PORT &
