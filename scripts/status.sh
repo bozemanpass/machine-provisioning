@@ -51,14 +51,14 @@ cat >/tmp/machine.status.$$ <<EOF
 CLOUD_INIT_LOG=/var/log/cloud-init-output.log
 STATUS="INITIALIZING"
 
-grep 'Failed to run module scripts_user' \$CLOUD_INIT_LOG >/dev/null
+sudo grep 'Failed to run module scripts_user' \$CLOUD_INIT_LOG >/dev/null
 if [ \$? -ne 0 ]; then
   STATUS="ERROR"
-fi
-
-grep '^Cloud-init v' \$CLOUD_INIT_LOG | grep 'Up.*seconds' >/dev/null
-if [ \$? -eq 0 ]; then
-  STATUS="UP"
+else
+  sudo grep '^Cloud-init v' \$CLOUD_INIT_LOG | grep 'Up.*seconds' >/dev/null
+  if [ \$? -eq 0 ]; then
+    STATUS="UP"
+  fi
 fi
 
 echo "Content-Type: application/json"
