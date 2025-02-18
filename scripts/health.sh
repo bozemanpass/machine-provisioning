@@ -55,7 +55,7 @@ sudo grep 'Failed to run module scripts_user' \$CLOUD_INIT_LOG >/dev/null
 if [ \$? -eq 0 ]; then
   STATUS="ERROR"
 else
-  sudo grep '^Cloud-init v' \$CLOUD_INIT_LOG | grep 'Up.*seconds' >/dev/null
+  sudo grep '^Cloud-init v' \$CLOUD_INIT_LOG | grep 'finished at' | grep 'Up.*seconds' >/dev/null
   if [ \$? -eq 0 ]; then
     STATUS="DONE"
   fi
