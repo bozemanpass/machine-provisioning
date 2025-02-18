@@ -57,7 +57,7 @@ if [ \$? -eq 0 ]; then
 else
   sudo grep '^Cloud-init v' \$CLOUD_INIT_LOG | grep 'finished at' | grep 'Up.*seconds' >/dev/null
   if [ \$? -eq 0 ]; then
-    STATUS="DONE"
+    STATUS="UP"
   fi
 fi
 
