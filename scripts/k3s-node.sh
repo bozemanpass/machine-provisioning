@@ -305,25 +305,28 @@ echo "**************************************************************************
 echo "Configuring image registries"
 
 if [[ -n "$IMAGE_REGISTRY" ]]; then
-  IMAGE_REGISTRY=$(echo $IMAGE_REGISTRY | sed 's|https\?://||' | cut -d'/' -f1)
+  IMAGE_REGISTRY=$(echo $IMAGE_REGISTRY | sed 's|https\?://||')
+  BARE_IMAGE_REGISTRY=$(echo $IMAGE_REGISTRY | cut -d'/' -f1)
   cat > /tmp/registries.yaml.$$ <<EOF
 mirrors:
-  $IMAGE_REGISTRY:
+  $BARE_IMAGE_REGISTRY:
     endpoint:
-      - https://$IMAGE_REGISTRY
+      - https://$BARE_IMAGE_REGISTRY
 EOF
 
   if [[ -n "$IMAGE_REGISTRY_USERNAME" ]] && [[ -n "$IMAGE_REGISTRY_PASSWORD" ]]; then
     cat >> /tmp/registries.yaml.$$ <<EOF
 configs:
-  $IMAGE_REGISTRY:
+  $BARE_IMAGE_REGISTRY:
     auth:
       username: "$IMAGE_REGISTRY_USERNAME"
       password: "$IMAGE_REGISTRY_PASSWORD"
 EOF
   fi
 
+  echo "default: $IMAGE_REGISTRY" > /tmp/default_registry.yaml
   sudo mv /tmp/registries.yaml.$$ /etc/rancher/k3s/registries.yaml
+  sudo mv /tmp/default-registry.yaml.$$ /etc/rancher/k3s/default-registry.yaml
   sudo systemctl restart k3s
 fi
 
