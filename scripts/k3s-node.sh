@@ -305,6 +305,7 @@ echo "**************************************************************************
 echo "Configuring image registries"
 
 if [[ -n "$IMAGE_REGISTRY" ]]; then
+  IMAGE_REGISTRY=$(echo $IMAGE_REGISTRY | sed 's|https\?://||' | cut -d'/' -f1)
   cat > /tmp/registries.yaml.$$ <<EOF
 mirrors:
   $IMAGE_REGISTRY:
