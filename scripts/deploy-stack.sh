@@ -50,12 +50,13 @@ while (( "$#" )); do
       --publish-images)
          PUBLISH_IMAGES="--publish-images"
          ;;
-      --extra-config-args)
-        shift&&EXTRA_CONFIG_ARGS="$1"||die
+      --)
+         shift&&EXTRA_CONFIG_ARGS="$*"
+         break
          ;;
       *)
-        echo "Unrecognized argument: $1" 1>&2
-        ;;
+         echo "Unrecognized argument: $1" 1>&2
+         ;;
    esac
    shift
 done
