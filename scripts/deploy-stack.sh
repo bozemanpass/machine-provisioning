@@ -10,7 +10,6 @@ PUBLISH_IMAGES=""
 DEPLOY_TO=""
 KUBE_CONFIG=""
 
-FQDN="${MACHINE_FQDN}"
 BUILD_POLICY="as-needed"
 
 STACK_CMD="stack"
@@ -54,15 +53,17 @@ while (( "$#" )); do
       --extra-config-args)
         shift&&EXTRA_CONFIG_ARGS="$1"||die
          ;;
-      --fqdn)
-        shift&&FQDN="$1"||die
-        ;;
       *)
         echo "Unrecognized argument: $1" 1>&2
         ;;
    esac
    shift
 done
+
+if [[ -z "$STACK_LOCATOR" ]]; then
+  echo "--stack <locator> is required"
+  exit 2
+fi
 
 if [[ -z "$IMAGE_REGISTRY" ]]; then
   if [[ -f "/etc/rancher/k3s/registries.yaml" ]]; then
@@ -72,33 +73,33 @@ if [[ -z "$IMAGE_REGISTRY" ]]; then
   fi
 fi
 
-if [ -z "$DEPLOY_TO" ]; then
-  if [ -d "/etc/rancher/k3s" ]; then
+if [[ -z "$DEPLOY_TO" ]]; then
+  if [[ -d "/etc/rancher/k3s" ]]; then
     DEPLOY_TO="k8s"
   else
     DEPLOY_TO="compose"
   fi
 fi
 
-if [ -n "$IMAGE_REGISTRY" ] && [ -n "$IMAGE_REGISTRY_PASSWORD" ]; then
+if [[ -n "$IMAGE_REGISTRY" ]] && [[ -n "$IMAGE_REGISTRY_PASSWORD" ]]; then
   docker login --username "$IMAGE_REGISTRY_USERNAME" --password "$IMAGE_REGISTRY_PASSWORD" $IMAGE_REGISTRY
 fi
 
 STACK_NAME="$(echo $STACK_LOCATOR | cut -d'/' -f2-)"
 
 $STACK_CMD fetch stack $STACK_LOCATOR
-if [ -z "$STACK_PATH" ]; then
+if [[ -z "$STACK_PATH" ]]; then
   STACK_PATH=`dirname $(find "$HOME/bpi/${STACK_NAME}" -name 'stack.yml' | head -1)`
 fi
 $STACK_CMD fetch repositories --stack $STACK_PATH
 $STACK_CMD build containers --stack $STACK_PATH --image-registry $IMAGE_REGISTRY --build-policy $BUILD_POLICY $PUBLISH_IMAGES
 
 KUBE_CONFIG_ARG=""
-if [ "$DEPLOY_TO" == "k8s" ]; then
-  if [ -z "$KUBE_CONFIG" ]; then
+if [[ "$DEPLOY_TO" == "k8s" ]]; then
+  if [[ -z "$KUBE_CONFIG" ]]; then
     KUBE_CONFIG="/etc/rancher/k3s/k3s.yaml"
   fi
-  if [ "$KUBE_CONFIG" == "/etc/rancher/k3s/k3s.yaml" ]; then
+  if [[ "$KUBE_CONFIG" == "/etc/rancher/k3s/k3s.yaml" ]]; then
     sudo chmod a+r /etc/rancher/k3s/k3s.yaml
   fi
   KUBE_CONFIG_ARG="--kube-config $KUBE_CONFIG"
