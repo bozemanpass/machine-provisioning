@@ -9,6 +9,7 @@ STACK_LOCATOR=""
 PUBLISH_IMAGES=""
 DEPLOY_TO=""
 KUBE_CONFIG=""
+INCLUDE_SPECS=""
 
 BUILD_POLICY="as-needed"
 
@@ -52,6 +53,9 @@ while (( "$#" )); do
          ;;
       --skip-deploy)
          SKIP_DEPLOY="true"
+         ;;
+      --include-spec)
+         shift&&INCLUDE_SPECS="$INCLUDE_SPECS $1"||die
          ;;
       --)
          shift&&EXTRA_CONFIG_ARGS="$*"
@@ -115,7 +119,7 @@ $STACK_CMD \
     init \
       $KUBE_CONFIG_ARG \
       --stack $STACK_PATH \
-      --output ${STACK_NAME}-stack-spec.yml \
+      --output ${STACK_NAME}.yml \
       --image-registry $IMAGE_REGISTRY ${EXTRA_CONFIG_ARGS}
 
 if [[ "$SKIP_DEPLOY" == "true" ]]; then
@@ -124,12 +128,12 @@ fi
 
 mkdir $HOME/deployments
 
-SPEC_FILE_ARG=""
-for f in `find . -maxdepth 1 -name '*-stack-spec.yml'`; do
-  SPEC_FILE_ARG="$SPEC_FILE_ARG --spec-file $f"
+SPEC_FILE_ARG="--spec-file ${STACK_NAME}.yml"
+for spec in $INCLUDE_SPECS; do
+  SPEC_FILE_ARG="$SPEC_FILE_ARG --spec-file $spec"
 done
 
-$STACK_CMD deploy $SPEC_ARG --deployment-dir $HOME/deployments/$STACK_NAME
+$STACK_CMD deploy $SPEC_FILE_ARG --deployment-dir $HOME/deployments/$STACK_NAME
 
 $STACK_CMD manage --dir $HOME/deployments/$STACK_NAME push-images
 $STACK_CMD manage --dir $HOME/deployments/$STACK_NAME start
