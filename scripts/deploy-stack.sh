@@ -50,6 +50,9 @@ while (( "$#" )); do
       --publish-images)
          PUBLISH_IMAGES="--publish-images"
          ;;
+      --skip-deploy)
+         SKIP_DEPLOY="true"
+         ;;
       --)
          shift&&EXTRA_CONFIG_ARGS="$*"
          break
@@ -112,15 +115,21 @@ $STACK_CMD \
     init \
       $KUBE_CONFIG_ARG \
       --stack $STACK_PATH \
-      --output $STACK_NAME.yml \
+      --output ${STACK_NAME}-stack-spec.yml \
       --image-registry $IMAGE_REGISTRY ${EXTRA_CONFIG_ARGS}
+
+if [[ "$SKIP_DEPLOY" == "true" ]]; then
+  exit 0
+fi
 
 mkdir $HOME/deployments
 
-$STACK_CMD \
-  deploy \
-     --spec-file $STACK_NAME.yml \
-     --deployment-dir $HOME/deployments/$STACK_NAME
+SPEC_FILE_ARG=""
+for f in `find . -maxdepth 1 -name '*-stack-spec.yml'`; do
+  SPEC_FILE_ARG="$SPEC_FILE_ARG --spec-file $f"
+done
+
+$STACK_CMD deploy $SPEC_ARG --deployment-dir $HOME/deployments/$STACK_NAME
 
 $STACK_CMD manage --dir $HOME/deployments/$STACK_NAME push-images
 $STACK_CMD manage --dir $HOME/deployments/$STACK_NAME start
