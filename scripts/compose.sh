@@ -24,7 +24,7 @@ while (( "$#" )); do
          shift&&SCRIPTS+=("$1")||die
          ;;
       --script-args)
-        shift&&ARGS[$(( ${#SCRIPTS[@]} - 1 ))]="$1"||die
+        shift&&ARGS[$(( ${#SCRIPTS[@]} ))]="$1"||die
          ;;
          *)
          echo "Unrecognized argument: $1"
