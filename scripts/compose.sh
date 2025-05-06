@@ -21,10 +21,10 @@ declare -A ARGS
 while (( "$#" )); do
    case $1 in
       --script-url)
-         shift&&LAST_SCRIPT="$1"&&SCRIPTS+=("$1")||die
+         shift&&SCRIPTS+=("$1")||die
          ;;
       --script-args)
-         shift&&ARGS["$LAST_SCRIPT"]="$1"||die
+        shift&&ARGS[$(( ${#SCRIPTS[@]} - 1 ))]="$1"||die
          ;;
          *)
          echo "Unrecognized argument: $1"
@@ -76,8 +76,8 @@ for script in "${SCRIPTS[@]}"; do
     cmd=/tmp/compose.step.$step
   fi
 
-  echo "Running: $cmd ${ARGS["$script"]}"
-  $cmd ${ARGS["$script"]} && rc=$? || rc=$?
+  echo "Running: $cmd ${ARGS["$step"]}"
+  $cmd ${ARGS["$step"]} && rc=$? || rc=$?
   if [[ $rc -ne 0 ]]; then
     echo "$script FAILED rc=$rc"
   fi
