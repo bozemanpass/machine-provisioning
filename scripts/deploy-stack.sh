@@ -87,10 +87,16 @@ if [[ -z "$DEPLOY_TO" ]]; then
   else
     DEPLOY_TO="compose"
   fi
+  if [ -z "`$STACK_CMD config get deploy-to`" ]; then
+    $STACK_CMD config set deploy-to $DEPLOY_TO
+  fi
 fi
 
 if [[ -n "$IMAGE_REGISTRY" ]] && [[ -n "$IMAGE_REGISTRY_PASSWORD" ]]; then
   docker login --username "$IMAGE_REGISTRY_USERNAME" --password "$IMAGE_REGISTRY_PASSWORD" $IMAGE_REGISTRY
+  if [ -z "`$STACK_CMD config get image-registry`" ] ; then
+    $STACK_CMD config set image-registry $IMAGE_REGISTRY
+  fi
 fi
 
 STACK_NAME="$(echo $STACK_LOCATOR | cut -d'/' -f2-)"
@@ -111,16 +117,18 @@ if [[ "$DEPLOY_TO" == "k8s" ]]; then
     sudo chmod a+r /etc/rancher/k3s/k3s.yaml
   fi
   KUBE_CONFIG_ARG="--kube-config $KUBE_CONFIG"
+  if [ -z "`$STACK_CMD config get kube-config`" ] ; then
+    $STACK_CMD config set kube-config $KUBE_CONFIG
+  fi
 fi
 
-$STACK_CMD \
-  config \
-    --deploy-to $DEPLOY_TO \
-    init \
-      $KUBE_CONFIG_ARG \
+$STACK_CMD init \
+      --deploy-to $DEPLOY_TO \
       --stack $STACK_PATH \
       --output ${STACK_NAME}.yml \
-      --image-registry $IMAGE_REGISTRY ${EXTRA_CONFIG_ARGS}
+      --image-registry $IMAGE_REGISTRY \
+      ${KUBE_CONFIG_ARG} \
+      ${EXTRA_CONFIG_ARGS}
 
 if [[ "$SKIP_DEPLOY" == "true" ]]; then
   exit 0
