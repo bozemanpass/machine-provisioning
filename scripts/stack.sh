@@ -8,11 +8,15 @@ export NEEDRESTART_MODE=a
 
 FORCE="false"
 VER="latest"
+BUILD="false"
 
-while getopts "fv:" arg; do
+while getopts "bfv:" arg; do
   case $arg in
     f)
       FORCE=true
+      ;;
+    b)
+      BUILD=true
       ;;
     v)
       VER=$OPTARG
@@ -21,6 +25,13 @@ while getopts "fv:" arg; do
 done
 
 set -euo pipefail  ## https://vaneyckt.io/posts/safer_bash_scripts_with_set_euxo_pipefail/
+
+if [[ -x "/usr/local/bin/stack" ]]; then
+  echo "/usr/local/bin/stack already exists"
+  if [[ "$FORCE" != "true" ]]; then
+    exit 0
+  fi
+fi
 
 function maybe_install {
   local todo=""
@@ -40,19 +51,30 @@ function maybe_install {
   fi
 }
 
-maybe_install wget
 
-if [[ -x "/usr/local/bin/stack" ]]; then
-  echo "/usr/local/bin/stack already exists"
-  if [[ "$FORCE" != "true" ]]; then
-    exit 0
-  fi
-fi
+if [[ "true" == "$BUILD" ]]; then
+  maybe_install git python3-venv
+  TMPD=`mktemp -d`
+  cd $TMPD
+  
+  git clone https://github.com/bozemanpass/stack.git
+  cd stack
+  
+  scripts/developer-mode-setup.sh
+  . venv/bin/activate
+  scripts/build_shiv_package.sh
+  
+  sudo mv package/stack-* /usr/local/bin/stack
 
-if [[ "$VER" == "latest" ]]; then
-  wget -O /tmp/stack.$$ https://github.com/bozemanpass/stack/releases/latest/download/stack
+  rm -rf $TMPD
 else
-  wget -O /tmp/stack.$$ https://github.com/bozemanpass/stack/releases/download/${VER}/stack
+  maybe_install wget
+  if [[ "$VER" == "latest" ]]; then
+    wget -O /tmp/stack.$$ https://github.com/bozemanpass/stack/releases/latest/download/stack
+  else
+    wget -O /tmp/stack.$$ https://github.com/bozemanpass/stack/releases/download/${VER}/stack
+  fi
+  sudo mv /tmp/stack.$$ /usr/local/bin/stack
 fi
-sudo mv /tmp/stack.$$ /usr/local/bin/stack
+
 sudo chmod a+x /usr/local/bin/stack
