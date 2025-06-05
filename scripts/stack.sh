@@ -33,6 +33,13 @@ if [[ -x "/usr/local/bin/stack" ]]; then
   fi
 fi
 
+OS_VER=`lsb_release -r | awk '{ print $2 }'`
+
+if [[ "$OS_VER" != "24.04" ]]; then
+  echo "Build required on $OS_VER"
+  BUILD="true"
+fi
+
 function maybe_install {
   local todo=""
   while (( "$#" )); do
@@ -59,6 +66,9 @@ if [[ "true" == "$BUILD" ]]; then
   
   git clone https://github.com/bozemanpass/stack.git
   cd stack
+  if [[ -n "$VER" ]]; then
+    git checkout $VER
+  fi
   
   scripts/developer-mode-setup.sh
   . venv/bin/activate
