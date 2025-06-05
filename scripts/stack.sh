@@ -7,7 +7,7 @@ export DEBIAN_FRONTEND=noninteractive
 export NEEDRESTART_MODE=a
 
 FORCE="false"
-VER="latest"
+VER=""
 BUILD="false"
 
 while getopts "bfv:" arg; do
@@ -66,7 +66,7 @@ if [[ "true" == "$BUILD" ]]; then
   
   git clone https://github.com/bozemanpass/stack.git
   cd stack
-  if [[ -n "$VER" ]]; then
+  if [[ -n "$VER" ]] && [[ "$VER" != "latest" ]]; then
     git checkout $VER
   fi
   
@@ -79,7 +79,7 @@ if [[ "true" == "$BUILD" ]]; then
   rm -rf $TMPD
 else
   maybe_install wget
-  if [[ "$VER" == "latest" ]]; then
+  if [[ -z "$VER" ]] || [[ "$VER" == "latest" ]]; then
     wget -O /tmp/stack.$$ https://github.com/bozemanpass/stack/releases/latest/download/stack
   else
     wget -O /tmp/stack.$$ https://github.com/bozemanpass/stack/releases/download/${VER}/stack
