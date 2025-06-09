@@ -99,7 +99,7 @@ if [[ -n "$IMAGE_REGISTRY" ]] && [[ -n "$IMAGE_REGISTRY_PASSWORD" ]]; then
   fi
 fi
 
-STACK_NAME="$(echo $STACK_LOCATOR | cut -d'/' -f2-)"
+STACK_NAME="$(echo $STACK_LOCATOR | cut -d'/' -f2- | cut -d'@' -f1)"
 
 $STACK_CMD fetch stack $STACK_LOCATOR
 if [[ -z "$STACK_PATH" ]]; then
