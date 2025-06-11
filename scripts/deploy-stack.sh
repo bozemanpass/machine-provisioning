@@ -6,7 +6,7 @@ IMAGE_REGISTRY=""
 IMAGE_REGISTRY_USERNAME=""
 IMAGE_REGISTRY_PASSWORD=""
 STACK_LOCATOR=""
-PUBLISH_IMAGES=""
+PUBLISH_IMAGES="--publish-images"
 DEPLOY_TO=""
 KUBE_CONFIG=""
 INCLUDE_SPECS=""
@@ -50,6 +50,9 @@ while (( "$#" )); do
          ;;
       --publish-images)
          PUBLISH_IMAGES="--publish-images"
+         ;;
+      --no-publish-images)
+         PUBLISH_IMAGES=""
          ;;
       --skip-deploy)
          SKIP_DEPLOY="true"
