@@ -10,6 +10,8 @@ PUBLISH_IMAGES="--publish-images"
 DEPLOY_TO=""
 KUBE_CONFIG=""
 INCLUDE_SPECS=""
+HTTP_PROXY_FQDN="${MACHINE_FQDN}"
+HTTP_PROXY_CLUSTER_ISSUER=""
 
 BUILD_POLICY="as-needed"
 
@@ -35,6 +37,12 @@ while (( "$#" )); do
          ;;
       --deploy-to)
          shift&&DEPLOY_TO="$1"||die
+         ;;
+      --http-proxy-fqdn)
+         shift&&HTTP_PROXY_FQDN="$1"||die
+         ;;
+      --http-proxy-clusterissuer)
+         shift&&HTTP_PROXY_CLUSTER_ISSUER="$1"||die
          ;;
       --kube-config)
          shift&&KUBE_CONFIG="$1"||die
@@ -102,11 +110,21 @@ if [[ -n "$IMAGE_REGISTRY" ]] && [[ -n "$IMAGE_REGISTRY_PASSWORD" ]]; then
   fi
 fi
 
-STACK_NAME="$(echo $STACK_LOCATOR | cut -d'/' -f2-)"
+if [[ -n "$HTTP_PROXY_FQDN" ]]; then
+  $STACK_CMD config set http-proxy-fqdn $HTTP_PROXY_FQDN
+fi
+
+if [[ -n "$HTTP_PROXY_CLUSTER_ISSUER" ]]; then
+  $STACK_CMD config set http-proxy-clusterissuer $HTTP_PROXY_CLUSTER_ISSUER
+fi
+
+STACK_NAME="$(echo $STACK_LOCATOR | cut -d'/' -f2- | cut -d'@' -f1)"
 
 $STACK_CMD fetch stack $STACK_LOCATOR
 if [[ -z "$STACK_PATH" ]]; then
   STACK_PATH=`dirname $(find "$HOME/bpi/${STACK_NAME}" -name 'stack.yml' | head -1)`
+else
+  STACK_PATH="${HOME}/bpi/${STACK_NAME}/${STACK_PATH}"
 fi
 $STACK_CMD fetch repositories --stack $STACK_PATH
 $STACK_CMD build containers --stack $STACK_PATH --image-registry $IMAGE_REGISTRY --build-policy $BUILD_POLICY $PUBLISH_IMAGES
