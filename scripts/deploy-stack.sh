@@ -115,13 +115,14 @@ if [[ -n "$HTTP_PROXY_CLUSTER_ISSUER" ]]; then
   $STACK_CMD config set http-proxy-clusterissuer $HTTP_PROXY_CLUSTER_ISSUER
 fi
 
+STACK_REPO_BASE_DIR=$(STACK_CMD config get repo-base-dir)
 STACK_NAME="$(echo $STACK_LOCATOR | cut -d'/' -f2- | cut -d'@' -f1)"
 
 $STACK_CMD fetch stack $STACK_LOCATOR
 if [[ -z "$STACK_PATH" ]]; then
-  STACK_PATH=`dirname $(find "$HOME/bpi/${STACK_NAME}" -name 'stack.yml' | head -1)`
+  STACK_PATH=`dirname $(find "${STACK_REPO_BASE_DIR}/${STACK_NAME}" -name 'stack.yml' | head -1)`
 else
-  STACK_PATH="${HOME}/bpi/${STACK_NAME}/${STACK_PATH}"
+  STACK_PATH="${STACK_REPO_BASE_DIR}/${STACK_NAME}/${STACK_PATH}"
 fi
 $STACK_CMD fetch repositories --stack $STACK_PATH
 $STACK_CMD build containers --stack $STACK_PATH --image-registry $IMAGE_REGISTRY --build-policy $BUILD_POLICY $PUBLISH_IMAGES
