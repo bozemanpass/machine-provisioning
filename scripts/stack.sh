@@ -35,7 +35,7 @@ fi
 
 OS_VER=`lsb_release -r | awk '{ print $2 }'`
 
-if [[ "$OS_VER" != "24.04" ]]; then
+if [[ "$OS_VER" != "24.04" ]] && [[ "$OS_VER" != "22.04" ]]; then
   echo "Build required on $OS_VER"
   BUILD="true"
 fi
