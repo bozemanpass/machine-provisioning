@@ -118,7 +118,7 @@ if [[ -n "$HTTP_PROXY_CLUSTER_ISSUER" ]]; then
   $STACK_CMD config set http-proxy-clusterissuer $HTTP_PROXY_CLUSTER_ISSUER
 fi
 
-STACK_REPO_BASE_DIR=$(STACK_CMD config get repo-base-dir)
+STACK_REPO_BASE_DIR=`$STACK_CMD config get repo-base-dir`
 STACK_NAME="$(echo $STACK_LOCATOR | cut -d'/' -f2- | cut -d'@' -f1)"
 
 $STACK_CMD fetch stack $STACK_LOCATOR
