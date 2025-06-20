@@ -122,9 +122,14 @@ STACK_REPO_BASE_DIR=`$STACK_CMD config get repo-base-dir`
 
 $STACK_CMD fetch stack $STACK_LOCATOR
 
-if [ -z "$STACK_NAME" ]; then
-  # Guess the stack name from the locator
-  STACK_NAME="$(echo $STACK_LOCATOR | cut -d'/' -f2- | cut -d'@' -f1)"
+if [[ -z "$STACK_NAME" ]]; then
+  # Is there only one stack available?
+  if [[ $($STACK_CMD list stacks | wc -l) -eq 1 ]]; then
+    STACK_NAME=$($STACK_CMD list stacks --name-only)
+  else
+    echo "Unable to determine stack name. Please specify --stack-name" >&2
+    exit 1
+  fi
 fi
 
 $STACK_CMD fetch repositories --stack $STACK_NAME
