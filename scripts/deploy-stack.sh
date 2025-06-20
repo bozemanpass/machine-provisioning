@@ -23,10 +23,10 @@ fi
 
 while (( "$#" )); do
    case $1 in
-      --stack)
+      --stack-repo)
          shift&&STACK_LOCATOR="$1"||die
          ;;
-      --stack-path)
+      --stack-name)
          shift&&STACK_PATH="$1"||die
          ;;
       --build-policy)
@@ -119,16 +119,16 @@ if [[ -n "$HTTP_PROXY_CLUSTER_ISSUER" ]]; then
 fi
 
 STACK_REPO_BASE_DIR=`$STACK_CMD config get repo-base-dir`
-STACK_NAME="$(echo $STACK_LOCATOR | cut -d'/' -f2- | cut -d'@' -f1)"
 
 $STACK_CMD fetch stack $STACK_LOCATOR
-if [[ -z "$STACK_PATH" ]]; then
-  STACK_PATH=`dirname $(find "${STACK_REPO_BASE_DIR}/${STACK_NAME}" -name 'stack.yml' | head -1)`
-else
-  STACK_PATH="${STACK_REPO_BASE_DIR}/${STACK_NAME}/${STACK_PATH}"
+
+if [ -z "$STACK_NAME" ]; then
+  # Guess the stack name from the locator
+  STACK_NAME="$(echo $STACK_LOCATOR | cut -d'/' -f2- | cut -d'@' -f1)"
 fi
-$STACK_CMD fetch repositories --stack $STACK_PATH
-$STACK_CMD build containers --stack $STACK_PATH --image-registry $IMAGE_REGISTRY --build-policy $BUILD_POLICY $PUBLISH_IMAGES
+
+$STACK_CMD fetch repositories --stack $STACK_NAME
+$STACK_CMD build containers --stack $STACK_NAME --image-registry $IMAGE_REGISTRY --build-policy $BUILD_POLICY $PUBLISH_IMAGES
 
 KUBE_CONFIG_ARG=""
 if [[ "$DEPLOY_TO" == "k8s" ]]; then
