@@ -27,7 +27,7 @@ while (( "$#" )); do
          shift&&STACK_LOCATOR="$1"||die
          ;;
       --stack-name)
-         shift&&STACK_PATH="$1"||die
+         shift&&STACK_NAME="$1"||die
          ;;
       --build-policy)
          shift&&BUILD_POLICY="$1"||die
@@ -151,7 +151,7 @@ fi
 
 $STACK_CMD init \
       --deploy-to $DEPLOY_TO \
-      --stack $STACK_PATH \
+      --stack $STACK_NAME \
       --output ${STACK_NAME}.yml \
       --image-registry $IMAGE_REGISTRY \
       ${KUBE_CONFIG_ARG} \
