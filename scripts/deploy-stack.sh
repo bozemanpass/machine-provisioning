@@ -5,7 +5,7 @@ BPI_SCRIPT_DEBUG="${BPI_SCRIPT_DEBUG}"
 IMAGE_REGISTRY=""
 IMAGE_REGISTRY_USERNAME=""
 IMAGE_REGISTRY_PASSWORD=""
-STACK_LOCATOR=""
+REPO_LOCATOR=""
 PUBLISH_IMAGES="--publish-images"
 DEPLOY_TO=""
 KUBE_CONFIG=""
@@ -24,7 +24,7 @@ fi
 while (( "$#" )); do
    case $1 in
       --stack-repo)
-         shift&&STACK_LOCATOR="$1"||die
+         shift&&REPO_LOCATOR="$1"||die
          ;;
       --stack-name)
          shift&&STACK_NAME="$1"||die
@@ -79,7 +79,7 @@ while (( "$#" )); do
    shift
 done
 
-if [[ -z "$STACK_LOCATOR" ]]; then
+if [[ -z "$REPO_LOCATOR" ]]; then
   echo "--stack <locator> is required"
   exit 2
 fi
@@ -120,7 +120,7 @@ fi
 
 STACK_REPO_BASE_DIR=`$STACK_CMD config get repo-base-dir`
 
-$STACK_CMD fetch stack $STACK_LOCATOR
+$STACK_CMD fetch repo $REPO_LOCATOR
 
 if [[ -z "$STACK_NAME" ]]; then
   # Is there only one stack available?
@@ -132,8 +132,7 @@ if [[ -z "$STACK_NAME" ]]; then
   fi
 fi
 
-$STACK_CMD fetch repositories --stack $STACK_NAME
-$STACK_CMD build containers --stack $STACK_NAME --image-registry $IMAGE_REGISTRY --build-policy $BUILD_POLICY $PUBLISH_IMAGES
+$STACK_CMD prepare --stack $STACK_NAME --image-registry $IMAGE_REGISTRY --build-policy $BUILD_POLICY $PUBLISH_IMAGES
 
 KUBE_CONFIG_ARG=""
 if [[ "$DEPLOY_TO" == "k8s" ]]; then
