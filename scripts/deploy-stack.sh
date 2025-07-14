@@ -124,8 +124,8 @@ $STACK_CMD fetch repo $REPO_LOCATOR
 
 if [[ -z "$STACK_NAME" ]]; then
   # Is there only one stack available?
-  if [[ $($STACK_CMD list stacks | wc -l) -eq 1 ]]; then
-    STACK_NAME=$($STACK_CMD list stacks --name-only)
+  if [[ $($STACK_CMD list | wc -l) -eq 1 ]]; then
+    STACK_NAME=$($STACK_CMD list)
   else
     echo "Unable to determine stack name. Please specify --stack-name" >&2
     exit 1
