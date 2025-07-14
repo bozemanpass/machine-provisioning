@@ -1,6 +1,8 @@
 #!/bin/bash
 
-BPI_SCRIPT_DEBUG="${BPI_SCRIPT_DEBUG}"
+set -x
+
+STACK_SCRIPT_DEBUG="${STACK_SCRIPT_DEBUG}"
 
 IMAGE_REGISTRY=""
 IMAGE_REGISTRY_USERNAME=""
@@ -16,10 +18,6 @@ HTTP_PROXY_CLUSTER_ISSUER=""
 BUILD_POLICY="as-needed"
 
 STACK_CMD="stack"
-if [[ -n "${BPI_SCRIPT_DEBUG}" ]]; then
-  set -x
-  STACK_CMD="${STACK_CMD} --debug --verbose"
-fi
 
 while (( "$#" )); do
    case $1 in
@@ -33,7 +31,7 @@ while (( "$#" )); do
          shift&&BUILD_POLICY="$1"||die
          ;;
       --debug)
-         BPI_SCRIPT_DEBUG="true"
+         STACK_SCRIPT_DEBUG="true"
          ;;
       --deploy-to)
          shift&&DEPLOY_TO="$1"||die
@@ -79,8 +77,12 @@ while (( "$#" )); do
    shift
 done
 
+if [[ -n "${STACK_SCRIPT_DEBUG}" ]]; then
+  STACK_CMD="${STACK_CMD} --debug --verbose"
+fi
+
 if [[ -z "$REPO_LOCATOR" ]]; then
-  echo "--stack <locator> is required"
+  echo "--stack-repo <locator> is required"
   exit 2
 fi
 
