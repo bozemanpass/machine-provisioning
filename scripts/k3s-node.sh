@@ -324,7 +324,9 @@ configs:
 EOF
   fi
 
-  echo "default: $IMAGE_REGISTRY" > /tmp/default-registry.yaml.$$
+  echo "registry: $IMAGE_REGISTRY" > /tmp/default-registry.yaml.$$
+  echo "username: $IMAGE_REGISTRY_USERNAME" >> /tmp/default-registry.yaml.$$
+  echo "password: $IMAGE_REGISTRY_PASSWORD" >> /tmp/default-registry.yaml.$$
   sudo mv /tmp/registries.yaml.$$ /etc/rancher/k3s/registries.yaml
   sudo mv /tmp/default-registry.yaml.$$ /etc/rancher/k3s/default-registry.yaml
   sudo systemctl restart k3s

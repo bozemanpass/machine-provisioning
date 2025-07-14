@@ -87,7 +87,11 @@ if [[ -z "$REPO_LOCATOR" ]]; then
 fi
 
 if [[ -z "$IMAGE_REGISTRY" ]]; then
-  if [[ -f "/etc/rancher/k3s/registries.yaml" ]]; then
+  if [[ -f "/etc/rancher/k3s/default-registry.yaml" ]]; then
+    IMAGE_REGISTRY=$(cat /etc/rancher/k3s/default-registry.yaml | grep 'registry:' | tail -1 | awk '{ print $2 }' | sed "s/[\"']//g")
+    IMAGE_REGISTRY_USERNAME=$(cat /etc/rancher/k3s/default-registry.yaml | grep 'username:' | tail -1 | awk '{ print $2 }' | sed "s/[\"']//g")
+    IMAGE_REGISTRY_PASSWORD=$(cat /etc/rancher/k3s/default-registry.yaml | grep 'password:' | tail -1 | awk '{ print $2 }' | sed "s/[\"']//g")
+  elif [[ -f "/etc/rancher/k3s/registries.yaml" ]]; then
     IMAGE_REGISTRY=$(cat /etc/rancher/k3s/registries.yaml | grep -A1 'configs:$' | tail -1 | awk '{ print $1 }' | cut -d':' -f1)
     IMAGE_REGISTRY_USERNAME=$(cat /etc/rancher/k3s/registries.yaml | grep 'username:' | awk '{ print $2 }' | sed "s/[\"']//g")
     IMAGE_REGISTRY_PASSWORD=$(cat /etc/rancher/k3s/registries.yaml | grep 'password:' | awk '{ print $2 }' | sed "s/[\"']//g")
