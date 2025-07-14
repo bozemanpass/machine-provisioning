@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -x
+set -e
 
 STACK_SCRIPT_DEBUG="${STACK_SCRIPT_DEBUG}"
 
@@ -78,6 +78,7 @@ while (( "$#" )); do
 done
 
 if [[ -n "${STACK_SCRIPT_DEBUG}" ]]; then
+  set -x
   STACK_CMD="${STACK_CMD} --debug --verbose"
 fi
 
